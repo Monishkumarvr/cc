@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loyalty Wealth: Honeymoon & Travel Strategy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Chart Container Styling - Mandatory Requirement */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Constraint width */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-btn {
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background-color: #eff6ff;
+            border-radius: 0.5rem;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .loyalty-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .loyalty-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .route-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+    </style>
+    <!-- Chosen Palette: Corporate Travel (Slate, Deep Blue for Avios, Warm Gold for Accor, White) -->
+    <!-- Application Structure Plan: 
+         1. Header: Contextual intro focused on Honeymoon/Europe goals.
+         2. Audit Section: Updated Visualization of spend including RENT and AMAZON specific data.
+         3. Strategy Engine: Calculator now includes "Rent Payment Mode" switch.
+         4. Optimization Grid: Specific "What to use Where" matrix (Rent, Grocery, Utilities).
+         5. Route Planner: Specific redemption options for CCU-Europe/Japan/Maldives.
+    -->
+</head>
+<body class="text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-slate-800">Loyalty<span class="text-blue-700">Wealth</span></span>
+                    </div>
+                </div>
+                <div class="flex space-x-4 items-center hidden md:flex" id="nav-menu">
+                    <button onclick="switchView('audit')" class="nav-btn px-3 py-2 text-slate-600 hover:text-blue-700 font-medium">Your Audit</button>
+                    <button onclick="switchView('optimization')" class="nav-btn px-3 py-2 text-slate-600 hover:text-blue-700 font-medium">Optimization Grid</button>
+                    <button onclick="switchView('strategy')" class="nav-btn px-3 py-2 text-slate-600 hover:text-blue-700 font-medium">Strategy Engine</button>
+                    <button onclick="switchView('routes')" class="nav-btn px-3 py-2 text-slate-600 hover:text-blue-700 font-medium">Trip Planner</button>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-500 hover:text-gray-700 focus:outline-none p-2">
+                        <span class="text-2xl">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-2 space-y-2 shadow-lg absolute w-full z-50">
+            <button onclick="switchView('audit'); toggleMobileMenu()" class="block px-4 py-3 w-full text-left hover:bg-gray-50 rounded-lg">Your Audit</button>
+            <button onclick="switchView('optimization'); toggleMobileMenu()" class="block px-4 py-3 w-full text-left hover:bg-gray-50 rounded-lg">Optimization Grid</button>
+            <button onclick="switchView('strategy'); toggleMobileMenu()" class="block px-4 py-3 w-full text-left hover:bg-gray-50 rounded-lg">Strategy Engine</button>
+            <button onclick="switchView('routes'); toggleMobileMenu()" class="block px-4 py-3 w-full text-left hover:bg-gray-50 rounded-lg">Trip Planner</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Section: Intro / Context -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-900">Honeymoon & Travel Optimizer</h1>
+            <p class="mt-2 text-lg text-slate-600">
+                Analysis of <strong>13 statements</strong> shows ~₹1.1 Lakh monthly spend potential.
+                <br>
+                <strong>Goal:</strong> Unlock <span class="text-blue-700 font-bold">Europe/Japan/Maldives</span> using your Rent (₹28k) and Online (₹30k) spend.
+            </p>
+        </div>
+
+        <!-- VIEW: AUDIT -->
+        <div id="view-audit" class="view-section animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Analysis Text -->
+                <div class="col-span-1 lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h2 class="text-xl font-bold text-slate-800 mb-4">Spend Analysis (Nov-Dec)</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- High Value Blocks -->
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                                <h4 class="font-bold text-red-800 text-sm uppercase">Missed Milestones</h4>
+                                <ul class="mt-2 text-sm text-red-700 space-y-2">
+                                    <li>• <strong>Rent (₹28k/mo):</strong> Currently untracked/UPI. This is ₹3.36L/year of "dead" spend.</li>
+                                    <li>• <strong>Amazon (₹30k/mo):</strong> Split between ICICI Amazon Pay & SBI. Good cashback, but doesn't help with Business Class flights.</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Good Habits -->
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                                <h4 class="font-bold text-green-800 text-sm uppercase">Current Wins</h4>
+                                <ul class="mt-2 text-sm text-green-700 space-y-2">
+                                    <li>• <strong>HSBC Live+ (Dining):</strong> Keep using this. 10% on Zomato/Dining is unbeatable.</li>
+                                    <li>• <strong>SBI Cashback:</strong> Excellent for small online purchases.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
+                            <strong>Insight:</strong> You have a "Portfolio Clash". You have too many cashback cards (Amazon, SBI, HSBC, Kiwi) and not enough "Miles" cards. For international travel (Europe/Japan), cashback is weak (₹1 saved is just ₹1). Miles are strong (1 Mile can be worth ₹1-₹4 for business class).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="col-span-1">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-full">
+                        <h3 class="font-bold text-slate-700 mb-4 text-center">Monthly Outflow Breakdown</h3>
+                        <div class="chart-container">
+                            <canvas id="spendChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-xs text-center text-gray-500">Based on User Input + Statement Analysis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: OPTIMIZATION GRID -->
+        <div id="view-optimization" class="view-section hidden">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">The "Use This, Not That" Grid</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Category: RENT -->
+                <div class="bg-white rounded-xl shadow-sm border-l-4 border-purple-500 overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-lg">Rent (₹28k)</h3>
+                            <span class="text-2xl">🏠</span>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Current:</span>
+                                <span class="text-red-500 font-medium">Bank Transfer (0 Rewards)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Fix:</span>
+                                <span class="text-purple-700 font-bold">Amex Plat Travel</span>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                                <strong>Why?</strong> Pay via RedGiraffe (0.4% fee) or Cred (higher fee). Spending ₹28k x 12 = ₹3.36L. This almost hits the ₹4L milestone on Amex Plat Travel alone, granting ~40k points + ₹10k Taj Voucher.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: ONLINE -->
+                <div class="bg-white rounded-xl shadow-sm border-l-4 border-blue-500 overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-lg">Online/Amazon (₹30k)</h3>
+                            <span class="text-2xl">🛒</span>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Current:</span>
+                                <span class="text-gray-700 font-medium">ICICI Amazon / SBI CB</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Fix:</span>
+                                <span class="text-blue-700 font-bold">SBI Cashback (Keep)</span>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                                <strong>Why?</strong> For general shopping, 5% hard cash is great. 
+                                <br><em>Exception:</em> If you are short on the Amex 4L milestone, route spend there. Otherwise, keep SBI Cashback.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: GROCERY -->
+                <div class="bg-white rounded-xl shadow-sm border-l-4 border-emerald-500 overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-lg">Grocery/Dining (₹15k)</h3>
+                            <span class="text-2xl">🥗</span>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Current:</span>
+                                <span class="text-gray-700 font-medium">HSBC Live+</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Fix:</span>
+                                <span class="text-emerald-700 font-bold">HSBC Live+ (Keep)</span>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                                <strong>Why?</strong> 10% Cashback on dining/Zomato/Swiggy is best-in-class. Don't change this.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: UTILITIES -->
+                <div class="bg-white rounded-xl shadow-sm border-l-4 border-orange-500 overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-lg">Utilities (₹5k)</h3>
+                            <span class="text-2xl">💡</span>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Fix:</span>
+                                <span class="text-orange-700 font-bold">Amazon Vouchers</span>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+                                <strong>Hack:</strong> Buy Amazon Pay Vouchers on <strong>Amex Plat Travel</strong> (Reward Multiplier 3X points) or <strong>SBI Cashback</strong> (5%). Load to Amazon Pay -> Pay Bills.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VIEW: STRATEGY ENGINE -->
+        <div id="view-strategy" class="view-section hidden">
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-indigo-100 max-w-3xl mx-auto">
+                <h2 class="text-xl font-bold text-indigo-900 mb-6">Milestone Simulator</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between bg-indigo-50 p-4 rounded-lg">
+                        <div>
+                            <span class="block font-bold text-indigo-900">Include Rent? (₹28k/mo)</span>
+                            <span class="text-xs text-indigo-600">Paying rent via Card unlocks milestones</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="rentToggle" class="sr-only peer" checked onchange="updateCalculator()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8 text-center">
+                        <div>
+                            <p class="text-sm text-gray-500">Annual Spend</p>
+                            <p class="text-2xl font-bold text-slate-800" id="annualSpendDisp">₹0</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Amex Plat Travel Rewards</p>
+                            <p class="text-2xl font-bold text-blue-700" id="pointsDisp">0 Pts</p>
+                            <p class="text-xs text-emerald-600 font-bold" id="tajDisp">+ ₹0 Taj Voucher</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4">
+                        <h3 class="font-bold text-slate-700 mb-2">What does this get you?</h3>
+                        <div id="redemptionResult" class="p-4 bg-white border border-gray-200 rounded text-sm text-slate-600">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: ROUTES -->
+        <div id="view-routes" class="view-section hidden">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Trip Planner: CCU Origin</h2>
+
+            <div class="space-y-6">
+                <!-- Europe -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-600">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">India to Europe (Business Class)</h3>
+                            <div class="flex gap-2 mt-1">
+                                <span class="route-badge bg-blue-100 text-blue-800">British Airways</span>
+                                <span class="route-badge bg-blue-100 text-blue-800">Qatar Airways</span>
+                            </div>
+                        </div>
+                        <span class="text-2xl">🇪🇺</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-600">
+                        <strong>Strategy:</strong> Use Avios.
+                        <br>Move Amex Points -> Marriott -> Avios (or Amex -> BA direct if bonus exists).
+                        <br><strong>Cost:</strong> Approx 40k-60k Avios one-way from India (e.g., DEL/BOM-LHR). From CCU, you likely route via Doha (Qatar Airways) which is excellent product.
+                    </p>
+                </div>
+
+                <!-- Japan -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">India to Japan (JAL)</h3>
+                            <div class="flex gap-2 mt-1">
+                                <span class="route-badge bg-red-100 text-red-800">Japan Airlines</span>
+                                <span class="route-badge bg-red-100 text-red-800">Cathay Pacific</span>
+                            </div>
+                        </div>
+                        <span class="text-2xl">🇯🇵</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-600">
+                        <strong>Strategy:</strong> Use Avios or Cathay Asia Miles.
+                        <br>JAL flies DEL-NRT directly. Excellent business class.
+                        <br><strong>Cost:</strong> ~40k-50k Miles one-way in Economy, ~80k in Business.
+                    </p>
+                </div>
+
+                <!-- Maldives -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-teal-400">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">Maldives Honeymoon</h3>
+                            <div class="flex gap-2 mt-1">
+                                <span class="route-badge bg-teal-100 text-teal-800">Hotels</span>
+                                <span class="route-badge bg-teal-100 text-teal-800">Marriott/Accor</span>
+                            </div>
+                        </div>
+                        <span class="text-2xl">🏝️</span>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-600">
+                        <strong>Strategy:</strong> Don't waste miles on short CCU-MLE flights. Use points for <strong>Hotels</strong>.
+                        <br><strong>Amex Plat Travel</strong> gives you a ₹10k Taj Voucher. Use this at <strong>Taj Exotica Maldives</strong> (expensive, but voucher helps) or use accumulated Marriott points for a free night at Le Méridien Maldives.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            monthlyData: {
+                rent: 28000,
+                online: 30000,
+                grocery: 15000,
+                utilities: 5000,
+                travel: 20000
+            }
+        };
+
+        // --- Navigation Logic ---
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            if (viewName === 'audit') renderChart();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Chart Logic ---
+        let spendChartInstance = null;
+        function renderChart() {
+            if (spendChartInstance) return;
+            const ctx = document.getElementById('spendChart').getContext('2d');
+            spendChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Online/Amazon', 'Rent', 'Travel', 'Grocery/Food', 'Utilities'],
+                    datasets: [{
+                        data: [30000, 28000, 20000, 15000, 5000],
+                        backgroundColor: ['#3b82f6', '#a855f7', '#f59e0b', '#10b981', '#f97316'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ₹' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Calculator Logic ---
+        function updateCalculator() {
+            const includeRent = document.getElementById('rentToggle').checked;
+            
+            // Base Spend (Online + Grocery + Util + Travel)
+            let monthly = state.monthlyData.online + state.monthlyData.grocery + state.monthlyData.utilities + state.monthlyData.travel;
+            
+            // If Rent Included
+            if (includeRent) monthly += state.monthlyData.rent;
+
+            const annual = monthly * 12;
+            
+            // Amex Plat Travel Simulation
+            // 4L Milestone = 40k MR + 10k Taj. 
+            // Regular earn: 1 MR per 50.
+            
+            let points = 0;
+            let taj = 0;
+            let msg = "";
+
+            if (annual >= 400000) {
+                // Hitting the 4L Milestone
+                points = 48000; // Approx (Regular + Bonus)
+                taj = 10000;
+                msg = "✅ <strong>Success!</strong> You hit the 4 Lakh milestone. This gives you ~48k Points + ₹10k Taj Voucher. That's enough for a <strong>return trip to Japan/Europe</strong> in Economy (via transfer) or a massive discount on Business.";
+            } else {
+                points = Math.floor(annual / 50);
+                taj = 0;
+                msg = "⚠️ <strong>Warning:</strong> Without rent, you might miss the 4 Lakh milestone on Amex Plat Travel. You need to route more spend (like Amazon) to this card.";
+            }
+
+            document.getElementById('annualSpendDisp').innerText = '₹' + annual.toLocaleString();
+            document.getElementById('pointsDisp').innerText = points.toLocaleString() + ' MR Pts';
+            document.getElementById('tajDisp').innerText = taj > 0 ? '+ ₹10,000 Taj Voucher' : 'Milestone Missed';
+            document.getElementById('redemptionResult').innerHTML = msg;
+        }
+
+        // Init
+        updateCalculator();
+        switchView('audit');
+    </script>
+    <!-- Visualization & Content Choices:
+         1. Pie Chart: Essential to show Rent vs Online proportion.
+         2. Optimization Grid: Card-style layout for specific category recommendations.
+         3. Routes: Simple badges and text for flight paths.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</body>
+</html>
